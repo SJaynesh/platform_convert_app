@@ -6,8 +6,17 @@ import 'package:platform_convert_app/controllers/homepage_controller.dart';
 import 'package:platform_convert_app/controllers/switch_controller.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int selectIndex = 0;
+
+  PageController pageController = PageController(initialPage: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -39,80 +48,116 @@ class HomePage extends StatelessWidget {
                 )
               ],
             ),
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            body: PageView(
+              controller: pageController,
+              onPageChanged: (index) {
+                selectIndex = index;
+                setState(() {});
+              },
               children: [
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) => Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(25),
+                                  topRight: Radius.circular(25),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text("Bottom Sheet"),
                             ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text("Bottom Sheet"),
+                          );
+                        },
+                        child: Text("Show Bottom Sheet"),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            DateTime? dateTime = await showDatePicker(
+                              context: context,
+                              barrierColor: Colors.grey,
+                              cancelText: "Close",
+                              confirmText: "Done",
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime(2030),
+                            );
+
+                            log("DateTime : $dateTime");
+
+                            homePageControllerFalse.setDateTime(date: dateTime);
+                          },
+                          icon: Icon(Icons.date_range),
                         ),
-                      );
-                    },
-                    child: Text("Show Bottom Sheet"),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        DateTime? dateTime = await showDatePicker(
-                          context: context,
-                          barrierColor: Colors.grey,
-                          cancelText: "Close",
-                          confirmText: "Done",
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2030),
-                        );
-
-                        log("DateTime : $dateTime");
-
-                        homePageControllerFalse.setDateTime(date: dateTime);
-                      },
-                      icon: Icon(Icons.date_range),
+                        Text((homePageControllerTrue.currentDate != null)
+                            ? "${homePageControllerTrue.currentDate?.day}/${homePageControllerTrue.currentDate?.month}/${homePageControllerTrue.currentDate?.year}"
+                            : "DD/MM/YYYY"),
+                      ],
                     ),
-                    Text((homePageControllerTrue.currentDate != null)
-                        ? "${homePageControllerTrue.currentDate?.day}/${homePageControllerTrue.currentDate?.month}/${homePageControllerTrue.currentDate?.year}"
-                        : "DD/MM/YYYY"),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            TimeOfDay? time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+
+                            if (time != null) {
+                              homePageControllerFalse.setHourAndMinute(
+                                  h: time.hour, m: time.minute);
+                              log("${time.hour % 12} : ${time.minute}");
+                            }
+                          },
+                          icon: Icon(Icons.watch_later),
+                        ),
+                        Text(homePageControllerTrue.hour != 0 &&
+                                homePageControllerTrue.minutes != 0
+                            ? "${homePageControllerTrue.hour} : ${homePageControllerTrue.minutes}"
+                            : "HH : MM"),
+                      ],
+                    )
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        TimeOfDay? time = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                        );
-
-                        if (time != null) {
-                          homePageControllerFalse.setHourAndMinute(
-                              h: time.hour, m: time.minute);
-                          log("${time.hour % 12} : ${time.minute}");
-                        }
-                      },
-                      icon: Icon(Icons.watch_later),
-                    ),
-                    Text(homePageControllerTrue.hour != 0 &&
-                            homePageControllerTrue.minutes != 0
-                        ? "${homePageControllerTrue.hour} : ${homePageControllerTrue.minutes}"
-                        : "HH : MM"),
-                  ],
-                )
+                Center(
+                  child: Text("Page 2"),
+                ),
+                Center(
+                  child: Text("Page 3"),
+                ),
+              ],
+            ),
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: selectIndex,
+              onDestinationSelected: (index) {
+                selectIndex = index;
+                setState(() {});
+              },
+              destinations: [
+                NavigationDestination(
+                  icon: Icon(Icons.home_filled),
+                  label: "Home",
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.search),
+                  label: "Second",
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.settings),
+                  label: "Third",
+                ),
               ],
             ),
           )
